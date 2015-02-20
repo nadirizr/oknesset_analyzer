@@ -6,11 +6,10 @@ from party import Party
 
 class Member(BaseModel):
   name = models.CharField(max_length=300)
-  party = models.ForeignKey(Party)
-  role = models.CharField(max_length=1000)
-  img_url = models.URLField()
   is_current = models.BooleanField(default=None)
+  img_url = models.URLField()
   resource_uri = models.CharField(max_length=3000)
+  party = models.ForeignKey(Party)
 
   @classmethod
   def from_json(cls, data, party):
@@ -22,3 +21,6 @@ class Member(BaseModel):
         self.name,
         self.id,
         " [current]" * self.is_current))
+
+class SkippedMember(BaseModel):
+  pass
