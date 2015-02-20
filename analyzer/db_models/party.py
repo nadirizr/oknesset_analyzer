@@ -1,19 +1,13 @@
 from django.db import models
 
+from base import BaseModel
 
-class Party(models.Model):
+
+class Party(BaseModel):
   number_of_seats = models.IntegerField()
   name = models.CharField(max_length=100)
-  is_coalition = models.BooleanField()
+  is_coalition = models.BooleanField(default=None)
   resource_uri = models.CharField(max_length=3000)
-
-  @staticmethod
-  def from_json(data):
-    filtered = {k: v for (k, v) in data.items() if k in Party._meta.get_all_field_names()}
-    party = Party.objects.create(**filtered)
-    party.save()
-
-    return party
 
   def __unicode__(self):
     return (u"%s (%s) [%s], seats: %s" % (
