@@ -1,4 +1,5 @@
 from django.db import models
+from flufl.enum import Enum
 
 
 class Party(models.Model):
@@ -8,7 +9,7 @@ class Party(models.Model):
   resource_uri = models.CharField()
 
   def __unicode__(self):
-    return (u"%s (%s) [%s], seats: %d" % (
+    return (u"%s (%s) [%s], seats: %s" % (
       self.name,
       self.id,
       "coalition" if self.is_coalition else "oposition",
@@ -60,26 +61,46 @@ class BillTag(models.Model):
   bill = models.ForeignKey(Bill)
 
 class Vote(models.Model):
+  class Type(Enum):
+    PRE = 1
+    FIRST = 2
+    APPROVAL = 3
+
   title = models.CharField()
   full_text = models.CharField()
   summary = models.CharField()
   bill = models.ForeignKey(Bill)
-  type = models.IntegerField()
+  type = models.IntegerField(choices=Type._enums.items())
   type_description = models.CharField()
   time = models.DateTimeField()
 
   def __unicode__(self):
-    return (u"%s (%s) - %s [%s]" % (
+    return (u"%s (%s), type: %s - %s [%s]" % (
       self.title,
       self.id,
+      self.Type(self.type),
       self.bill,
       self.time))
 
+class VoteMemberDecision(models.Model):
+  class Decision(Enum):
+    FOR = 1
+    AGAINST = -1
+    ABSTAIN = 0
+
+  member = models.ForeignKey(Member)
+  vote = models.ForeignKey(Vote)
+  decision = models.IntegerField(choices=Decision._enums.items())
+
+  def __unicode__(self):
+    return "%s: %s" % (
+            self.member.__unicode__(),
+            self.Decision(self.decision))
+
 class Agenda(models.Model):
-  name = models.CharField(max_length=1000)
+  name = models.CharField()
   description = models.TextField()
-  img_url = models.URLField()
-  owner = models.CharField(max_length=200)
+  public_owner_name = models.CharField()
   members = models.ManyToManyField(Member, through='MemberAgenda')
   parties = models.ManyToManyField(Party, through='PartyAgenda')
   votes = models.ManyToManyField(Vote, through='VoteAgenda')
@@ -91,15 +112,8 @@ class VoteAgenda(models.Model):
   agenda = models.ForeignKey(Agenda)
   vote = models.ForeignKey(Vote)
   score = models.DecimalField(max_digits=6, decimal_places=2)
-  reasoning = models.CharField(max_length=1000)
-
-class VoteMemberDecision(models.Model):
-  member = models.ForeignKey(Member)
-  vote = models.ForeignKey(Vote)
-  decision = models.CharField(max_length=100)
-
-  def __unicode__(self):
-    return "%s: %s" % (self.member.__unicode__(), self.decision)
+  importance = models.DecimalField(max_digits=6, decimal_places=2)
+  reasoning = models.CharField()
 
 class PartyAgenda(models.Model):
   agenda = models.ForeignKey(Agenda)
