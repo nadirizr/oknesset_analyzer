@@ -3,10 +3,10 @@ from flufl.enum import Enum
 
 
 class Party(models.Model):
-  name = models.CharField()
+  name = models.CharField(max_length=100)
   is_coalition = models.BooleanField()
   number_of_seats = models.IntegerField()
-  resource_uri = models.CharField()
+  resource_uri = models.CharField(max_length=3000)
 
   def __unicode__(self):
     return (u"%s (%s) [%s], seats: %s" % (
@@ -16,12 +16,12 @@ class Party(models.Model):
       self.number_of_seats))
 
 class Member(models.Model):
-  name = models.CharField()
+  name = models.CharField(max_length=300)
   party = models.ForeignKey(Party)
-  role = models.CharField()
+  role = models.CharField(max_length=1000)
   img_url = models.URLField()
   is_current = models.BooleanField()
-  resource_uri = models.CharField()
+  resource_uri = models.CharField(max_length=3000)
 
   def __unicode__(self):
     return (u"%s (%s)  %s" % (
@@ -30,15 +30,15 @@ class Member(models.Model):
         " [current]" * self.is_current))
 
 class Tag(models.Model):
-  name = models.CharField(max_length=200)
+  name = models.CharField(max_length=300)
 
   def __unicode__(self):
     return u"%s (%s)" % (self.name, self.id)
 
 class Bill(models.Model):
-  title = models.CharField()
-  full_title = models.CharField()
-  stage = models.CharField()
+  title = models.CharField(max_length=1000)
+  full_title = models.CharField(max_length=3000)
+  stage = models.CharField(max_length=1000)
   tags = models.ManyToManyField(Tag, through='BillTag')
   proposing_members = models.ManyToManyField(
       Member, through='BillProposingMember', related_name='bills_proposed')
@@ -66,12 +66,12 @@ class Vote(models.Model):
     FIRST = 2
     APPROVAL = 3
 
-  title = models.CharField()
-  full_text = models.CharField()
-  summary = models.CharField()
+  title = models.CharField(max_length=1000)
+  full_text = models.TextField()
+  summary = models.TextField()
   bill = models.ForeignKey(Bill)
   type = models.IntegerField(choices=Type._enums.items())
-  type_description = models.CharField()
+  type_description = models.CharField(max_length=1000)
   time = models.DateTimeField()
 
   def __unicode__(self):
@@ -98,9 +98,9 @@ class VoteMemberDecision(models.Model):
             self.Decision(self.decision))
 
 class Agenda(models.Model):
-  name = models.CharField()
+  name = models.CharField(max_length=1000)
   description = models.TextField()
-  public_owner_name = models.CharField()
+  public_owner_name = models.CharField(max_length=1000)
   members = models.ManyToManyField(Member, through='MemberAgenda')
   parties = models.ManyToManyField(Party, through='PartyAgenda')
   votes = models.ManyToManyField(Vote, through='VoteAgenda')
@@ -113,7 +113,7 @@ class VoteAgenda(models.Model):
   vote = models.ForeignKey(Vote)
   score = models.DecimalField(max_digits=6, decimal_places=2)
   importance = models.DecimalField(max_digits=6, decimal_places=2)
-  reasoning = models.CharField()
+  reasoning = models.CharField(max_length=1000)
 
 class PartyAgenda(models.Model):
   agenda = models.ForeignKey(Agenda)
