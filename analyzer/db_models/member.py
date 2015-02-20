@@ -12,6 +12,11 @@ class Member(BaseModel):
   is_current = models.BooleanField(default=None)
   resource_uri = models.CharField(max_length=3000)
 
+  @classmethod
+  def from_json(cls, data, party):
+    data["party"] = party
+    return super(Member, cls).from_json(data)
+
   def __unicode__(self):
     return (u"%s (%s)  %s" % (
         self.name,

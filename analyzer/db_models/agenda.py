@@ -14,6 +14,19 @@ class Agenda(BaseModel):
   parties = models.ManyToManyField(Party, through='PartyAgenda')
   votes = models.ManyToManyField(Vote, through='VoteAgenda')
 
+  @classmethod
+  def from_json(cls, data, members=None, parties=None, votes=None):
+    agenda = super(Agenda, cls).from_json(data)
+
+    if members:
+      agenda.members.add(*members)
+    if parties:
+      agenda.parties.add(*parties)
+    if votes:
+      agenda.votes.add(*votes)
+
+    return bill
+
   def __unicode__(self):
     return u"%s (%s)" % (self.name, self.id)
 

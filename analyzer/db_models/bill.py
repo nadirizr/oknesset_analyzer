@@ -14,6 +14,17 @@ class Bill(BaseModel):
   proposing_members = models.ManyToManyField(
       Member, through='BillProposingMember', related_name='bills_proposed')
 
+  @classmethod
+  def from_json(cls, data, tags=None, proposing_members=None):
+    bill = super(Bill, cls).from_json(data)
+
+    if tags:
+      bill.tags.add(*tags)
+    if proposing_members:
+      bill.proposing_members.add(*proposing_members)
+
+    return bill
+
   def proposingParties(self):
     return set([member.party for member in self.proposing_members.all()])
 

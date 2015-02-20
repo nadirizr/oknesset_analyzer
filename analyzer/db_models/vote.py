@@ -20,6 +20,11 @@ class Vote(BaseModel):
   type_description = models.CharField(max_length=1000)
   time = models.DateTimeField()
 
+  @classmethod
+  def from_json(cls, data, bill):
+    data["bill"] = bill
+    return super(Vote, cls).from_json(data)
+
   def __unicode__(self):
     return (u"%s (%s), type: %s - %s [%s]" % (
       self.title,

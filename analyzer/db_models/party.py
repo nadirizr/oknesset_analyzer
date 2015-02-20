@@ -4,8 +4,8 @@ from base import BaseModel
 
 
 class Party(BaseModel):
-  number_of_seats = models.IntegerField()
   name = models.CharField(max_length=100)
+  number_of_seats = models.IntegerField()
   is_coalition = models.BooleanField(default=None)
   resource_uri = models.CharField(max_length=3000)
 
