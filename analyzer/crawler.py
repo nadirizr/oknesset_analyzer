@@ -4,6 +4,7 @@ import traceback
 import urllib
 from collections import Iterator
 from progressbar import ProgressBar
+from analyzer.db_models.member import Member
 from analyzer.db_models.party import Party
 
 DOMAIN = 'http://oknesset.org'
@@ -82,21 +83,37 @@ class Resource(JsonResource, Iterator):
 class OKnessetCrawler:
   def __init__(self):
     self.parties = {party.id: party for party in Party.objects.all()}
+    self.members = {member.id: member for member in Member.objects.all()}
 
   def populate_all(self):
     self.populate_parties()
+    self.populate_members()
 
   def populate_parties(self):
+    self._populate_resource('party', self.parties, self.populate_party)
+
+  def populate_party(self, item):
+    return Party.from_json(item)
+
+  def populate_members(self):
+    self._populate_resource('member', self.members, self.populate_member)
+
+  def populate_member(self, item):
+    member = Member.from_json(item)
+    return member
+
+  @staticmethod
+  def _populate_resource(resource, container, populator):
     print '='*80
-    print 'Fetching parties...'
-    data = Resource.get('party')
+    print 'Fetching %s...' % resource
+    data = Resource.get(resource)
     progress = ProgressBar()
     for item in progress(data):
-      if item['id'] in self.parties:
+      if item['id'] in container:
         continue
       try:
-        party = Party.from_json(item)
-        self.parties[party.id] = party
+        model = populator(item)
+        container[model.id] = model
       except Exception, e:
         print e
         traceback.print_exc()
