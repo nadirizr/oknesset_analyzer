@@ -9,3 +9,6 @@ class BaseModel(models.Model):
     instance = cls.objects.create(**filtered)
     instance.save()
     return instance
+
+  class Meta:
+    abstract = True
